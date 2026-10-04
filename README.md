@@ -36,17 +36,25 @@ Na instalação, escolha o escopo:
 - **project** — gravado em `.claude/settings.json` do projeto (vai para o git, o time recebe junto)
 - **local** — só você, só neste projeto
 
-Atualizar: `/plugin marketplace update orch-marketplace`.
+### Atualizações
+
+Novas versões chegam sem reinstalar, quando o `version` do `plugin.json` muda:
+
+- **Automático (recomendado):** `/plugin` → aba *Marketplaces* → `orch-marketplace` → *Enable auto-update*. Marketplaces de terceiros vêm com auto-update **desligado** por padrão.
+- **Manual:** `claude plugin update orch@orch-marketplace` no terminal, ou pela aba *Installed* do `/plugin`.
+
+Depois de atualizar, rode `/reload-plugins` ou abra uma nova sessão.
 
 ### Pré-configurar um projeto para o time
 
-Adicione ao `.claude/settings.json` do projeto. Quem abrir o projeto recebe o convite para instalar:
+Adicione ao `.claude/settings.json` do projeto. Quem abrir o projeto recebe o convite para instalar, e as atualizações chegam sozinhas (`autoUpdate`):
 
 ```json
 {
   "extraKnownMarketplaces": {
     "orch-marketplace": {
-      "source": { "source": "github", "repo": "RKXP-Software/orch" }
+      "source": { "source": "github", "repo": "RKXP-Software/orch" },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {
