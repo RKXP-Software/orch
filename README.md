@@ -11,6 +11,7 @@ Plugin que recebe uma demanda em linguagem natural, classifica, monta um plano e
 | Tipo | Nome | Função |
 |---|---|---|
 | Skill | `/orch:orquestrar` | Classifica, planeja, delega, verifica e relata. Modos `--catalogo` e `--plano` |
+| Skill | `/orch:especializar` | Analisa o projeto e adapta o orch a ele: perfil + especialistas do projeto |
 | Skill | `/orch:criar-agente` | Cria novos agentes/skills no projeto a partir dos templates |
 | Agente | `orch:pesquisador` | Leitura: entender código, pesquisar na web |
 | Agente | `orch:planejador` | Leitura: decompor e arquitetar |
@@ -63,6 +64,26 @@ Adicione ao `.claude/settings.json` do projeto. Quem abrir o projeto recebe o co
 }
 ```
 
+## Especializar para o seu projeto
+
+Os agentes do orch funcionam em qualquer linguagem. Para que conheçam **o seu** projeto (stack, comandos, arquitetura, convenções), rode na raiz dele:
+
+```
+/orch:especializar
+```
+
+1. Detecta a stack (web, .NET, Godot, Unity, Python, Rust, C++...) e analisa o código com 3 pesquisadores em paralelo.
+2. Grava `.claude/orch/perfil.md` e o importa no `CLAUDE.md` — todos os agentes passam a segui-lo.
+3. Propõe até 5 especialistas do projeto (ex.: `cenas-e-nodes`, `api`, `banco-e-migrations`); você escolhe quais criar em `.claude/agents/`.
+
+| Variação | Uso |
+|---|---|
+| `/orch:especializar --atualizar` | Atualiza perfil e especialistas gerados após mudanças no código (os seus agentes manuais não são tocados) |
+| `/orch:especializar --novo "Godot 4 + C#"` | Projeto ainda sem código: perfil a partir da stack pretendida |
+| `/orch:especializar --so-perfil` | Só o perfil, sem especialistas |
+
+Versione `.claude/orch/` e `.claude/agents/` no git do projeto para o time compartilhar.
+
 ## Personalizar por projeto
 
 O orquestrador usa também os agentes do próprio projeto (`.claude/agents/`) e do usuário (`~/.claude/agents/`), com prioridade sobre os do plugin. Para criar um: `/orch:criar-agente agente <nome> <o que faz>`.
@@ -76,7 +97,8 @@ Orch/
 │  ├─ .claude-plugin/plugin.json     nome, versão, metadados
 │  ├─ agents/                        7 especialistas
 │  ├─ skills/orquestrar/  skills/criar-agente/
-│  └─ templates/                     modelos de agente e skill
+│  ├─ skills/especializar/
+│  └─ templates/                     modelos de agente, skill, perfil e especialista
 ├─ exemplos.md                       prompts de teste do roteamento
 ├─ CHANGELOG.md
 └─ CLAUDE.md                         instruções para desenvolver o plugin

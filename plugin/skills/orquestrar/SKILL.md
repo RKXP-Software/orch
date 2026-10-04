@@ -15,9 +15,17 @@ Raiz do plugin: `${CLAUDE_PLUGIN_ROOT}` (agentes em `agents/`, templates em `tem
 ## Modos
 
 - `--catalogo` → só execute o Passo 1 e mostre a tabela do catálogo. Pare.
-- `--plano <demanda>` → execute os Passos 1–3, mostre o plano e pare sem executar.
+- `--plano <demanda>` → execute os Passos 0–3, mostre o plano e pare sem executar.
 - qualquer outra coisa → fluxo completo.
 - vazio → pergunte qual é a demanda.
+
+## Passo 0 — Contexto do projeto
+
+Leia `.claude/orch/perfil.md`, se existir (pode já estar no contexto via `CLAUDE.md`). Ele traz stack, comandos, arquitetura, convenções e os especialistas do projeto.
+
+- **Perfil existe**: use-o nos Passos 3 e 4. Se o cabeçalho indicar `modo: novo` e o projeto já tiver código, ou se o commit do cabeçalho estiver muito atrás (`git rev-list --count <commit>..HEAD` > 50) ou a data tiver mais de 30 dias, mencione numa linha que `/orch:especializar --atualizar` deixaria os agentes mais precisos. Não bloqueie.
+- **Perfil não existe** e o projeto tem código: mencione numa linha que `/orch:especializar` adapta os agentes ao projeto. Siga normalmente, sem perfil.
+- Faça cada sugestão no máximo uma vez por sessão, e nunca em demandas triviais.
 
 ## Passo 1 — Descobrir o catálogo
 
@@ -61,6 +69,8 @@ Mapa padrão (agentes do plugin orch):
 | revisão / segurança | `orch:revisor` |
 | docs / README | `orch:documentador` |
 
+**Especialistas do projeto** (gerados por `/orch:especializar`, listados no perfil) têm prioridade sobre o genérico equivalente quando a etapa cai no domínio/caminhos deles — ex.: implementar uma cena Godot vai para o especialista de cenas, não para `orch:desenvolvedor`. Etapas que cruzam domínios: divida por domínio ou use o genérico.
+
 Apresente o plano assim (curto):
 
 ```
@@ -89,7 +99,9 @@ Peça confirmação antes de executar **somente** se o plano tiver ≥ 5 etapas,
   Restrição de ferramentas: use apenas {tools do frontmatter}.
   ```
 - **Skill carregada** → `Skill(skill: "<name>", args: ...)`. **Skill não carregada** → leia o `SKILL.md` e siga as instruções você mesmo.
-- O prompt de cada agente deve ser **autossuficiente** (ele começa sem nenhum contexto): objetivo da etapa, arquivos/caminhos relevantes, resultados das etapas anteriores de que depende (resumidos), critério de pronto e o formato de retorno esperado:
+- O prompt de cada agente deve ser **autossuficiente** (ele começa sem nenhum contexto): objetivo da etapa, arquivos/caminhos relevantes, resultados das etapas anteriores de que depende (resumidos), critério de pronto e o formato de retorno esperado.
+- Com perfil: inclua no prompt a stack em uma linha, os **comandos de build/teste/lint** relevantes para a etapa e os arquivos de referência do padrão a seguir. Sem perfil: peça ao agente que descubra os comandos nos manifestos/CI antes de verificar.
+- Formato de retorno:
   ```
   Retorne: (1) o que foi feito, (2) arquivos alterados/lidos com caminho, (3) pendências ou riscos.
   ```
