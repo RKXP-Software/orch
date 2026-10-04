@@ -1,0 +1,15 @@
+{
+  "name": "orch-marketplace",
+  "description": "Marketplace do Orch — orquestrador de agentes e skills para Claude Code.",
+  "owner": {
+    "name": "Pedro Sarmento"
+  },
+  "plugins": [
+    {
+      "name": "orch",
+      "source": "./plugin",
+      "description": "Orquestrador que delega demandas a agentes especialistas.",
+      "category": "productivity"
+    }
+  ]
+}

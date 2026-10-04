@@ -1,0 +1,9 @@
+# SO / editores
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Config local do Claude Code (não versionar)
+.claude/settings.local.json

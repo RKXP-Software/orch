@@ -1,0 +1,16 @@
+{
+  "name": "orch",
+  "displayName": "Orch — Orquestrador",
+  "version": "0.1.0",
+  "description": "Orquestrador que classifica uma demanda, monta um plano e delega cada etapa a agentes especialistas (pesquisador, planejador, desenvolvedor, depurador, testador, revisor, documentador).",
+  "author": {
+    "name": "Pedro Sarmento"
+  },
+  "keywords": [
+    "orchestrator",
+    "agents",
+    "subagents",
+    "delegation",
+    "pt-BR"
+  ]
+}
