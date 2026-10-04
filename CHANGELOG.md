@@ -2,6 +2,19 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/). Versão em `plugin/.claude-plugin/plugin.json`.
 
+## [0.3.0] — 2026-10-04
+
+### Adicionado
+- Planos persistidos: cada plano é salvo em `.claude/orch/planos/<id>.md` no projeto, com índice em `INDICE.md` — memória do que foi planejado e implementado.
+- Decomposição: a demanda vira um ou mais planos (um por objetivo independente; fases para planos com mais de ~8 tarefas), cada um com tarefas T1..Tn, dependências, arquivos de escrita previstos e critério de pronto.
+- Agendamento por dependências: tarefas prontas disparam em paralelo (até 4), e as liberadas começam assim que suas dependências terminam; conflitos de escrita viram dependência.
+- Modos `--executar <id>` (executa/retoma plano salvo) e `--planos` (lista o índice).
+- Template `plano.md`.
+
+### Alterado
+- `--plano` agora salva os planos com status `planejado` em vez de só exibir.
+- O arquivo do plano é atualizado a cada tarefa (status, resultado, registro de execução) e ao final (resultado final).
+
 ## [0.2.0] — 2026-10-04
 
 ### Adicionado

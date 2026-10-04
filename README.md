@@ -10,7 +10,7 @@ Plugin que recebe uma demanda em linguagem natural, classifica, monta um plano e
 
 | Tipo | Nome | Função |
 |---|---|---|
-| Skill | `/orch:orquestrar` | Classifica, planeja, delega, verifica e relata. Modos `--catalogo` e `--plano` |
+| Skill | `/orch:orquestrar` | Quebra a demanda em planos e tarefas com dependências, executa em paralelo o que for independente e salva tudo em `.claude/orch/planos/` |
 | Skill | `/orch:especializar` | Analisa o projeto e adapta o orch a ele: perfil + especialistas do projeto |
 | Skill | `/orch:criar-agente` | Cria novos agentes/skills no projeto a partir dos templates |
 | Agente | `orch:pesquisador` | Leitura: entender código, pesquisar na web |
@@ -64,6 +64,32 @@ Adicione ao `.claude/settings.json` do projeto. Quem abrir o projeto recebe o co
 }
 ```
 
+## Planos e paralelismo
+
+`/orch:orquestrar` transforma a demanda em **um ou mais planos** (um por objetivo independente), cada um com tarefas, executor e dependências:
+
+```
+T1 Mapear auth        orch:pesquisador     —
+T2 Levantar API       orch:pesquisador     —
+T3 Implementar        orch:desenvolvedor   T1, T2
+T4 Testes             orch:testador        T3
+T5 Revisão            orch:revisor         T3
+
+Onda 1: T1 ∥ T2  →  Onda 2: T3  →  Onda 3: T4 ∥ T5
+```
+
+Tarefas sem dependência rodam ao mesmo tempo (até 4); uma tarefa começa assim que suas dependências terminam. Tarefas que alteram os mesmos arquivos nunca rodam juntas.
+
+Todo plano é salvo em `.claude/orch/planos/<data-hora-slug>.md` e listado em `.claude/orch/planos/INDICE.md`, com status por tarefa, resultados e registro de execução — o histórico do que foi implementado. Versione essa pasta no git do projeto.
+
+| Comando | Faz |
+|---|---|
+| `/orch:orquestrar <demanda>` | Planeja, salva e executa |
+| `/orch:orquestrar --plano <demanda>` | Só planeja e salva (status `planejado`) |
+| `/orch:orquestrar --executar <id>` | Executa ou retoma um plano salvo, pulando o que já foi concluído |
+| `/orch:orquestrar --planos` | Lista os planos do projeto |
+| `/orch:orquestrar --catalogo` | Lista agentes e skills disponíveis |
+
 ## Especializar para o seu projeto
 
 Os agentes do orch funcionam em qualquer linguagem. Para que conheçam **o seu** projeto (stack, comandos, arquitetura, convenções), rode na raiz dele:
@@ -98,7 +124,7 @@ Orch/
 │  ├─ agents/                        7 especialistas
 │  ├─ skills/orquestrar/  skills/criar-agente/
 │  ├─ skills/especializar/
-│  └─ templates/                     modelos de agente, skill, perfil e especialista
+│  └─ templates/                     modelos de agente, skill, perfil, especialista e plano
 ├─ exemplos.md                       prompts de teste do roteamento
 ├─ CHANGELOG.md
 └─ CLAUDE.md                         instruções para desenvolver o plugin
