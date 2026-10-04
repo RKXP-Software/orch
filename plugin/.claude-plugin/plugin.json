@@ -6,6 +6,8 @@
   "author": {
     "name": "Pedro Sarmento"
   },
+  "homepage": "https://github.com/RKXP-Software/orch",
+  "repository": "https://github.com/RKXP-Software/orch",
   "keywords": [
     "orchestrator",
     "agents",

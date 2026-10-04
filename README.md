@@ -25,11 +25,11 @@ Plugin que recebe uma demanda em linguagem natural, classifica, monta um plano e
 Dentro do Claude Code (terminal ou app desktop):
 
 ```
-/plugin marketplace add <usuario>/<repo>
+/plugin marketplace add RKXP-Software/orch
 /plugin install orch@orch-marketplace
 ```
 
-Troque `<usuario>/<repo>` pelo repositório GitHub deste projeto. Também aceita uma URL git (`https://.../orch.git`) ou uma pasta local (`/plugin marketplace add F:/caminho/Orch`).
+Também aceita a URL git (`https://github.com/RKXP-Software/orch.git`) ou uma pasta local (`/plugin marketplace add F:/caminho/Orch`).
 
 Na instalação, escolha o escopo:
 - **user** — disponível em todos os seus projetos
@@ -46,7 +46,7 @@ Adicione ao `.claude/settings.json` do projeto. Quem abrir o projeto recebe o co
 {
   "extraKnownMarketplaces": {
     "orch-marketplace": {
-      "source": { "source": "github", "repo": "<usuario>/<repo>" }
+      "source": { "source": "github", "repo": "RKXP-Software/orch" }
     }
   },
   "enabledPlugins": {
