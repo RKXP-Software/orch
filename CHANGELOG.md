@@ -2,6 +2,15 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/). Versão em `plugin/.claude-plugin/plugin.json`.
 
+## [0.4.0] — 2026-10-05
+
+### Adicionado
+- Estado do plano legível por máquina: `.claude/orch/planos/<id>.json` (schema `orch.plano/1`), gravado junto com o `.md` a cada mudança — status do plano e das tarefas, início/fim, resultados e eventos. É o contrato com o app [orch-app](https://github.com/RKXP-Software/orch-app).
+- Template `plano.json`.
+
+### Alterado
+- O plano passa a ser atualizado também ao **iniciar** cada tarefa (`em-andamento` + horário), não só ao concluir.
+
 ## [0.3.0] — 2026-10-04
 
 ### Adicionado

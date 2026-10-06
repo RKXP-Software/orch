@@ -14,8 +14,15 @@ Raiz do plugin: `${CLAUDE_PLUGIN_ROOT}` (templates em `templates/`). Versão: `v
 
 **Memória de planos** (na raiz do projeto, onde a sessão foi aberta):
 - `.claude/orch/planos/<id>.md` — um arquivo por plano, no formato de `${CLAUDE_PLUGIN_ROOT}/templates/plano.md`
+- `.claude/orch/planos/<id>.json` — estado do mesmo plano legível por máquina, no formato de `${CLAUDE_PLUGIN_ROOT}/templates/plano.json` (lido pelo app orch e outras ferramentas)
 - `.claude/orch/planos/INDICE.md` — índice de todos os planos
 - `id` = `AAAAMMDD-HHMM-<slug-curto>` (data/hora local de criação; ex.: `20261004-1530-login-jwt`)
+
+**Sempre que alterar o `.md` de um plano, reescreva o `.json` correspondente na mesma rodada**, com o mesmo conteúdo: status do plano e das tarefas, `atualizado`, `inicio`/`fim` das tarefas, `resultado` (resumo de 1–3 frases) e um item novo em `eventos`. O `.md` é para humanos; o `.json` é o contrato com ferramentas. Regras do JSON:
+- `schema` fixo `orch.plano/1`; datas em ISO 8601 com fuso (`2026-10-04T15:30:00-03:00`); campos sem valor = `null` ou `[]`, nunca omitidos.
+- `status` do plano e das tarefas usa exatamente os mesmos valores do `.md`.
+- `eventos[].tipo`: `plano-criado`, `plano-iniciado`, `tarefa-iniciada`, `tarefa-concluida`, `tarefa-falhou`, `tarefa-pulada`, `tarefa-reenviada`, `replanejado`, `plano-encerrado`.
+- Grave o arquivo inteiro de uma vez (Write), JSON válido, sem comentários.
 
 ## Modos
 
@@ -104,7 +111,7 @@ Mapa padrão:
 
 ### 3.4 Salvar
 
-1. Para cada plano, preencha o template e grave `.claude/orch/planos/<id>.md` com status `planejado`. `commit-inicial` = `git rev-parse --short HEAD` (ou `sem-git`).
+1. Para cada plano, preencha os templates e grave `.claude/orch/planos/<id>.md` e `<id>.json` com status `planejado`. `commit-inicial` = `git rev-parse --short HEAD` (ou `sem-git`).
 2. Atualize `.claude/orch/planos/INDICE.md` (crie se não existir), uma linha por plano, mais recente no topo:
    ```
    # Planos do orch
@@ -160,7 +167,7 @@ Autossuficiente (o agente começa sem contexto):
 
 ### Registrar no plano (após cada tarefa)
 
-Atualize o arquivo do plano a cada conclusão — é a memória do que foi implementado:
+Atualize o arquivo do plano (`.md` e `.json`) ao iniciar cada tarefa (status `em-andamento`, `inicio`, evento `tarefa-iniciada`) e a cada conclusão — é a memória do que foi implementado e o que permite acompanhar o progresso de fora:
 - status na tabela de tarefas;
 - **Resultado** no detalhe da tarefa (resumo curto, arquivos, verificação);
 - linha no **Registro de execução** (`AAAA-MM-DD HH:MM · T3 concluída por orch:desenvolvedor`).
@@ -175,7 +182,7 @@ Agentes devolvem relatórios que o usuário não vê: extraia o essencial.
 
 ## Passo 6 — Encerrar e relatar
 
-1. Status final do plano: `concluido` (todas concluídas), `parcial` (alguma falhou/pulada) ou `cancelado`. Atualize cabeçalho, índice (status e `x/y` tarefas) e preencha **Resultado final**.
+1. Status final do plano: `concluido` (todas concluídas), `parcial` (alguma falhou/pulada) ou `cancelado`. Atualize cabeçalho, índice (status e `x/y` tarefas) e preencha **Resultado final** (no `.json`: `status`, `resultadoFinal` e evento `plano-encerrado`).
 2. Responda ao usuário com:
    - **Resultado** em 1–3 frases;
    - tabela curta: tarefa → executor → status (✅ / ⚠️ / ❌);

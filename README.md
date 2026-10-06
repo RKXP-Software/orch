@@ -80,7 +80,7 @@ Onda 1: T1 ∥ T2  →  Onda 2: T3  →  Onda 3: T4 ∥ T5
 
 Tarefas sem dependência rodam ao mesmo tempo (até 4); uma tarefa começa assim que suas dependências terminam. Tarefas que alteram os mesmos arquivos nunca rodam juntas.
 
-Todo plano é salvo em `.claude/orch/planos/<data-hora-slug>.md` e listado em `.claude/orch/planos/INDICE.md`, com status por tarefa, resultados e registro de execução — o histórico do que foi implementado. Versione essa pasta no git do projeto.
+Todo plano é salvo em `.claude/orch/planos/<data-hora-slug>.md` e listado em `.claude/orch/planos/INDICE.md`, com status por tarefa, resultados e registro de execução — o histórico do que foi implementado. Versione essa pasta no git do projeto. Ao lado de cada `.md` fica um `<id>.json` com o mesmo estado em formato legível por máquina (usado pelo app desktop [orch-app](https://github.com/RKXP-Software/orch-app)).
 
 | Comando | Faz |
 |---|---|
