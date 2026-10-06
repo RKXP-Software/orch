@@ -33,3 +33,6 @@ Use para validar o roteamento depois de mudar agentes/skills. Comece com `--plan
 | Interromper no meio e rodar `--executar <id>` de novo | Retoma: pula `concluida`, revisa `em-andamento` |
 | `/orch:orquestrar --planos` | Mostra o `INDICE.md` |
 | `/orch:orquestrar quanto é 2^10?` | Trivial: responde direto, **não** cria plano |
+| `/orch:orquestrar --executar <id> --paralelo 2` | Nunca mais de 2 tarefas simultâneas |
+| `/orch:orquestrar --tarefa <id> T2` | Executa só a T2 com o executor do plano; não altera `.md`/`.json`; termina com `RESULTADO: …` |
+| `/orch:orquestrar --tarefa <id> T3` com T2 (dependência) ainda pendente | Avisa que a dependência não foi concluída e para sem executar |

@@ -1,7 +1,7 @@
 ---
 name: orquestrar
 description: Orquestrador. Recebe uma demanda em linguagem natural, classifica, quebra em um ou mais planos de tarefas com dependências, salva os planos em .md no projeto e delega cada tarefa ao agente ou skill mais adequado, executando em paralelo o que não depende de nada. Use quando o usuário pedir /orquestrar, pedir para "delegar", "orquestrar", planejar uma implementação, retomar um plano salvo, ou trouxer uma demanda com várias etapas.
-argument-hint: "<demanda> | --plano <demanda> | --executar <id> | --planos | --catalogo"
+argument-hint: "<demanda> | --plano <demanda> | --executar <id> [--paralelo <n>] | --tarefa <id> <Tn> | --planos | --catalogo"
 ---
 
 # Orquestrador
@@ -21,8 +21,10 @@ Raiz do plugin: `${CLAUDE_PLUGIN_ROOT}` (templates em `templates/`). Versão: `v
 **Sempre que alterar o `.md` de um plano, reescreva o `.json` correspondente na mesma rodada**, com o mesmo conteúdo: status do plano e das tarefas, `atualizado`, `inicio`/`fim` das tarefas, `resultado` (resumo de 1–3 frases) e um item novo em `eventos`. O `.md` é para humanos; o `.json` é o contrato com ferramentas. Regras do JSON:
 - `schema` fixo `orch.plano/1`; datas em ISO 8601 com fuso (`2026-10-04T15:30:00-03:00`); campos sem valor = `null` ou `[]`, nunca omitidos.
 - `status` do plano e das tarefas usa exatamente os mesmos valores do `.md`.
-- `eventos[].tipo`: `plano-criado`, `plano-iniciado`, `tarefa-iniciada`, `tarefa-concluida`, `tarefa-falhou`, `tarefa-pulada`, `tarefa-reenviada`, `replanejado`, `plano-encerrado`.
+- `eventos[].tipo`: `plano-criado`, `plano-iniciado`, `tarefa-iniciada`, `tarefa-concluida`, `tarefa-falhou`, `tarefa-pulada`, `tarefa-reenviada`, `replanejado`, `plano-encerrado` (o app orch pode acrescentar `tarefa-interrompida`, `tarefa-mesclada` e `tarefa-merge-conflito`; preserve-os).
 - Grave o arquivo inteiro de uma vez (Write), JSON válido, sem comentários.
+- **Preserve campos que você não conhece** nas tarefas (`modelo`, `sessaoApp`, `pasta`, `merge`): são do app orch. Ao regravar, copie-os como estão.
+- O `.json` é a fonte do estado quando existir: o app pode tê-lo atualizado depois do `.md`. Ao carregar um plano (`--executar`, `--tarefa`), leia o `.json` e use o `.md` só para o texto.
 
 ## Modos
 
@@ -31,9 +33,23 @@ Raiz do plugin: `${CLAUDE_PLUGIN_ROOT}` (templates em `templates/`). Versão: `v
 | `<demanda>` | Fluxo completo: Passos 0–6 (planeja, salva, executa, registra) |
 | `--plano <demanda>` | Passos 0–3: planeja e **salva** os planos com status `planejado`. Não executa |
 | `--executar <id ou trecho do nome>` | Carrega um plano salvo e executa/retoma (Passos 4–6), pulando tarefas `concluida` |
+| `--paralelo <n>` | Modificador de `<demanda>` e `--executar`: máximo de tarefas simultâneas (1–6). Sem ele, até 4 |
+| `--tarefa <id> <Tn>` | Executa **somente** a tarefa `Tn` do plano (ver "Modo tarefa"). Não agenda, não toca nos arquivos do plano |
 | `--planos` | Mostra o `INDICE.md` (ou "nenhum plano ainda") e para |
 | `--catalogo` | Só o Passo 1: tabela do catálogo. Para |
 | vazio | Pergunte qual é a demanda |
+
+## Modo tarefa (`--tarefa <id> <Tn>`)
+
+Usado por apps que agendam as tarefas por conta própria (cada tarefa numa sessão separada). Nesse modo:
+
+1. Leia o plano — o arquivo indicado na linha `Plano: <caminho>` do prompt, se houver (o trabalho pode estar numa worktree sem a pasta `.claude/orch`), ou `.claude/orch/planos/<id>.json` — e localize a tarefa `Tn`: executor, "Pronto quando", arquivos de escrita e resultados das tarefas de que ela depende.
+2. Execute **só essa tarefa**, com o executor indicado, como no Passo 4 ("Como chamar cada executor" e "Prompt de cada tarefa"). Um único agente; não dispare outras tarefas, não replaneje e não crie planos.
+3. **Não altere** `.md`, `.json` nem `INDICE.md` do plano: quem registra o estado é o chamador. Respeite os arquivos de escrita previstos.
+4. Se a tarefa não existir ou tiver dependências não concluídas, diga isso e pare sem executar.
+5. Termine com um resumo curto no formato do Passo 4 (o que foi feito, arquivos, verificação, pendências). A primeira linha deve ser `RESULTADO: <1–3 frases>`.
+
+Pule os Passos 0, 2, 3, 5 e 6.
 
 ## Passo 0 — Contexto do projeto
 
@@ -134,10 +150,10 @@ Ao começar: status do plano → `em-execucao` (cabeçalho, índice e registro d
 
 Mantenha o conjunto de tarefas **prontas** = status `pendente` com todas as dependências `concluida`.
 
-1. Dispare **todas as tarefas prontas na mesma mensagem** (várias chamadas Agent), até **4 simultâneas**. Marque-as `em-andamento` no arquivo.
+1. Dispare **todas as tarefas prontas na mesma mensagem** (várias chamadas Agent), até **4 simultâneas** (ou o valor de `--paralelo <n>`, se informado, no máximo 6). Marque-as `em-andamento` no arquivo.
 2. Quando uma tarefa terminar, registre o resultado (abaixo) e recalcule as prontas: dispare imediatamente as que foram liberadas — **não espere a onda inteira** terminar.
 3. Repita até não haver tarefas pendentes, ou só restarem tarefas bloqueadas por falha.
-4. Planos do mesmo grupo sem dependência entre si podem ter tarefas rodando ao mesmo tempo (respeitando o limite de 4 e os conflitos de escrita entre planos).
+4. Planos do mesmo grupo sem dependência entre si podem ter tarefas rodando ao mesmo tempo (respeitando o limite de simultâneas e os conflitos de escrita entre planos).
 
 Ao retomar (`--executar`): tarefas `concluida` são mantidas; `em-andamento` de uma sessão anterior voltam a `pendente` (confira no código se já foram feitas antes de repetir).
 

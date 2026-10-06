@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/). Versão em `plugin/.claude-plugin/plugin.json`.
 
+## [0.5.0] — 2026-10-06
+
+### Adicionado
+- Modo `--tarefa <id> <Tn>` em `/orch:orquestrar`: executa só uma tarefa do plano, sem agendar e sem alterar os arquivos do plano. Permite que o app orch-app agende as tarefas (uma sessão por tarefa, modelo por tarefa, execução manual por ondas).
+- Parâmetro `--paralelo <n>` (1–6) para `--executar` e fluxo completo: substitui o limite fixo de 4 tarefas simultâneas.
+- Campos opcionais por tarefa no `.json` (`modelo`, `sessaoApp`, `pasta`, `merge`), gravados pelo app; o orquestrador os preserva ao regravar. O schema continua `orch.plano/1`.
+- Com `Plano: <caminho>` no prompt, `--tarefa` lê o plano desse caminho (tarefas em worktree).
+
+### Alterado
+- O `.json` do plano passa a ser a fonte do estado ao carregar um plano; o `.md` serve ao texto.
+
 ## [0.4.0] — 2026-10-05
 
 ### Adicionado

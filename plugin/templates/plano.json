@@ -24,7 +24,11 @@
       "inicio": null,
       "fim": null,
       "tentativas": 0,
-      "resultado": null
+      "resultado": null,
+      "modelo": null,
+      "sessaoApp": null,
+      "pasta": null,
+      "merge": null
     },
     {
       "id": "T3",
@@ -37,7 +41,11 @@
       "inicio": null,
       "fim": null,
       "tentativas": 0,
-      "resultado": null
+      "resultado": null,
+      "modelo": null,
+      "sessaoApp": null,
+      "pasta": null,
+      "merge": null
     }
   ],
   "eventos": [
